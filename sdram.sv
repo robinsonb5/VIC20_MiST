@@ -106,20 +106,21 @@ localparam MODE_PRE    = 2'b11;
 
 // initialization 
 reg [1:0] mode;
-always @(posedge clk) begin
-	reg [4:0] reset=5'h1f;
-	reg init_old=0;
-	init_old <= init;
+reg [4:0] reset=5'h1f;
 
-	if(init_old & ~init) reset <= 5'h1f;
-	else if(q == STATE_LAST) begin
-		if(reset != 0) begin
-			reset <= reset - 5'd1;
-			if(reset == 14)     mode <= MODE_PRE;
-			else if(reset == 3) mode <= MODE_LDM;
-			else                mode <= MODE_RESET;
+always @(posedge clk or posedge init) begin // Use async reset since init comes from the PLL's locked signal!
+	if(init)
+		reset <= 5'h1f;
+	else begin
+		if(q == STATE_LAST) begin
+			if(reset != 0) begin
+				reset <= reset - 5'd1;
+				if(reset == 14)     mode <= MODE_PRE;
+				else if(reset == 3) mode <= MODE_LDM;
+				else                mode <= MODE_RESET;
+			end
+			else mode <= MODE_NORMAL;
 		end
-		else mode <= MODE_NORMAL;
 	end
 end
 

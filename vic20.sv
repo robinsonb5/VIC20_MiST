@@ -23,7 +23,7 @@
 
 module vic20_mist
 (
-   input         CLOCK_27[0],   // Input clock 27 MHz
+   input         CLOCK_27,   // Input clock 27 MHz
 
    output  [5:0] VGA_R,
    output  [5:0] VGA_G,
@@ -168,7 +168,7 @@ pll_reconfig pll_reconfig_inst
 
 pll_vic20 pll_vic20
 (
-    .inclk0(CLOCK_27[0]),
+    .inclk0(CLOCK_27),
     .c0(clk_sys),  //35.48 MHz PAL, 28.63 MHz NTSC
     .areset(pll_areset),
     .scanclk(pll_scanclk),
@@ -222,7 +222,7 @@ end
 
 pll27 pll
 (
-    .inclk0(CLOCK_27[0]),
+    .inclk0(CLOCK_27),
     .c0(clk_32) //32 MHz
 );
 
@@ -232,7 +232,7 @@ always @(posedge clk_sys) begin
     clk_ref <= !sys_count;
     sys_count <= sys_count + 1'd1;
 
-    reset <= st_reset | st_cart_unload | buttons[1] | rom_download | force_reset | fn_keys[10] | ~pll_locked;
+    reset <= st_reset | st_cart_unload | buttons[1] | rom_download | force_reset | fn_keys[10];
     cart_unload <= 0;
     if (st_cart_unload | buttons[1] | (fn_keys[10] & mod_keys[0])) cart_unload <= 1;
     c1541_reset <= reset;
@@ -387,7 +387,7 @@ vic20 #(.I_EXTERNAL_ROM(1'b1)) VIC20
 );
 
 //////////////////   MEMORY   //////////////////
-assign SDRAM_CLK = clk_sys;
+assign SDRAM_CLK = ~clk_sys;
 
 wire  [7:0] sdram_in;
 wire  [7:0] sdram_out;
