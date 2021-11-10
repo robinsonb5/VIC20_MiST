@@ -55,12 +55,17 @@ module vic20_mist
    output        SDRAM_CLK,
    output        SDRAM_CKE,
 
-`ifdef DEMISTIFY_PS2_KEYBOARD
+`ifdef DEMISTIFY
    input         PS2_CLK_IN,
 	input         PS2_DAT_IN,
-`endif
-`ifdef DEMISTIFY_C64_KEYBOARD
    input  [64:0] C64_KEYS,
+   input         TAPE_BUTTON_N,
+	input         IEC_ATN_I,
+	input         IEC_DATA_I,
+	input         IEC_CLK_I,
+	output        IEC_ATN_O,
+	output        IEC_DATA_O,
+	output        IEC_CLK_O,
 `endif
    input         UART_RX,
    output        UART_TX
@@ -329,16 +334,13 @@ keyboard keyboard
 (
     .reset(reset),
     .clk_sys(clk_sys),
-`ifdef DEMISTIFY_PS2_KEYBOARD
+`ifdef DEMISTIFY
     .ps2_kbd_clk(PS2_CLK_IN),
     .ps2_kbd_data(PS2_DAT_IN),
+    .c64_keys(C64_KEYS),
 `else
     .ps2_kbd_clk(ps2Clk),
     .ps2_kbd_data(ps2Data),
-`endif
-`ifdef DEMISTIFY_C64_KEYBOARD
-    .c64_keys(C64_KEYS),
-`else
     .c64_keys({65{1'b1}}),
 `endif
     .col_in(col_in),
@@ -350,6 +352,9 @@ keyboard keyboard
 );
 
 wire  [7:0] vic20_joy = joystick_0 | joystick_1;
+wire iec_clk_int;
+wire iec_data_int;
+wire iec_atn_int;
 
 vic20 #(.I_EXTERNAL_ROM(1'b1)) VIC20
 (
@@ -370,15 +375,19 @@ vic20 #(.I_EXTERNAL_ROM(1'b1)) VIC20
     .atn_o(vic20_iec_atn_o),
     .clk_o(vic20_iec_clk_o),
     .data_o(vic20_iec_data_o),
-    .clk_i(c1541_iec_clk_o),
-    .data_i(c1541_iec_data_o),
+	 .atn_i(iec_atn_int),
+    .clk_i(iec_clk_int),
+    .data_i(iec_data_int),
 
     .O_ROW_IN(row_in),
     .I_COL_OUT(col_out),
     .O_COL_IN(col_in),
     .I_ROW_OUT(row_out),
+`ifdef DEMISTIFY
     .I_RESTORE_OUT(fn_keys[11]|~C64_KEYS[64]),
-
+`else
+    .I_RESTORE_OUT(fn_keys[11]),
+`endif
     .I_CART_EN(|st_8k_rom),  // at $A000(8k)
     .I_CART_RO(st_8k_rom != 2'd2),
     .I_RAM_EXT({&st_ram_expansion, st_ram_expansion[1], |st_ram_expansion, st_3k_expansion}), //at $6000(8k),$4000(8k),$2000(8k),$0400(3k)
@@ -604,7 +613,11 @@ c1530 c1530
     .cass_write(cass_write),
     .cass_motor(cass_motor),
     .cass_sense(cass_sense),
+`ifdef DEMISTIFY
+    .osd_play_stop_toggle(st_tap_play_btn | fn_keys[9] | ~TAPE_BUTTON_N),
+`else
     .osd_play_stop_toggle(st_tap_play_btn | fn_keys[9]),
+`endif
     .ear_input(uart_rxD2)
 );
 //////////////////   AUDIO   //////////////////
@@ -703,6 +716,20 @@ always @(posedge clk_1541)
 reg c1541_reset_32_d;
 reg c1541_reset_32;
 
+`ifdef DEMISTIFY
+assign IEC_ATN_O = disk_present ? 1'b1 : vic20_iec_atn_o;
+assign IEC_CLK_O = disk_present ? 1'b1 : vic20_iec_clk_o;
+assign IEC_DATA_O = disk_present ? 1'b1 : vic20_iec_data_o;
+
+assign iec_clk_int = disk_present ? c1541_iec_clk_o : IEC_CLK_I;
+assign iec_data_int = disk_present ? c1541_iec_data_o : IEC_DATA_I;
+assign iec_atn_int = disk_present ? c1541_iec_atn_o : IEC_ATN_I;
+`else
+assign iec_clk_int = c1541_iec_clk_o;
+assign iec_data_int = c1541_iec_data_o;
+assign iec_atn_int = c1541_iec_atn_o;
+`endif
+
 // Sync reset to the 32MHz domain since some of the logic inside
 // the emulated drive uses synchronous resets.
 always @(posedge clk_1541) begin
@@ -721,6 +748,7 @@ c1541_sd c1541_sd (
     .iec_atn_i  ( vic20_iec_atn_o  ),
     .iec_data_i ( vic20_iec_data_o ),
     .iec_clk_i  ( vic20_iec_clk_o  ),
+	 .iec_atn_o  ( c1541_iec_atn_o  ),
     .iec_data_o ( c1541_iec_data_o ),
     .iec_clk_o  ( c1541_iec_clk_o ),
 

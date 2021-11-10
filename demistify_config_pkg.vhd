@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 package demistify_config_pkg is
 constant demistify_romspace : integer := 14; -- 16k address space to accommodate 12K of ROM
 constant demistify_romsize1 : integer := 13; -- 8k fot the first chunk
-constant demistify_romsize2 : integer := 13; -- 4k for the second chunk, mirrored across the last 4k
+constant demistify_romsize2 : integer := 12; -- 4k for the second chunk, mirrored across the last 4k
 
 -- Core-specific button mapping.
 -- Joysticks are (currently) 8 bits width, with the directions in the lower four bits.
@@ -63,11 +63,18 @@ constant demistify_serialdebug : std_logic := '0';
 			VGA_R		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 			VGA_G		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 			VGA_B		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
-			PS2_CLK_IN : in std_logic;
-			PS2_DAT_IN : in std_logic;
-			C64_KEYS : in std_logic_vector(64 downto 0);
 			AUDIO_L  : out std_logic;
-			AUDIO_R  : out std_logic
+			AUDIO_R  : out std_logic;
+			PS2_CLK_IN : in std_logic :='1';
+			PS2_DAT_IN : in std_logic :='1';
+			C64_KEYS : in std_logic_vector(64 downto 0) := (others=>'1');
+			TAPE_BUTTON_N : in std_logic := '1';
+			IEC_ATN_I : in std_logic := '1';
+			IEC_DATA_I : in std_logic := '1';
+			IEC_CLK_I : in std_logic := '1';
+			IEC_ATN_O : out std_logic;
+			IEC_DATA_O : out std_logic;
+			IEC_CLK_O : out std_logic
 		);
 	END COMPONENT;
 	

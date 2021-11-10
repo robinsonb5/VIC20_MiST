@@ -220,11 +220,9 @@ guest: COMPONENT vic20_mist
 		VGA_G => vga_green(7 downto 2),
 		VGA_B => vga_blue(7 downto 2),
 		AUDIO_L => sigma_l,
-		AUDIO_R => sigma_r
---		PS2K_CLK => ps2_keyboard_clk_in or intercept, -- Block keyboard when OSD is active
---		PS2K_DAT => ps2_keyboard_dat_in,
---		PS2M_CLK => ps2_mouse_clk_in,
---		PS2M_DAT => ps2_mouse_dat_in
+		AUDIO_R => sigma_r,
+		PS2_CLK_IN => ps2_keyboard_clk_in or intercept, -- Block keyboard when OSD is active
+		PS2_DAT_IN => ps2_keyboard_dat_in or intercept
 );
 
 -- Pass internal signals to external SPI interface
