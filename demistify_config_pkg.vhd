@@ -36,6 +36,7 @@ constant demistify_serialdebug : std_logic := '0';
 		(
 			CLOCK_27 :	IN STD_LOGIC;	-- Comment out one of these two lines
 --			CLOCK_27 :	IN STD_LOGIC_VECTOR(1 downto 0);	-- to match the guest core
+			LED : OUT STD_LOGIC;
 			SDRAM_DQ		:	 INOUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			SDRAM_A		:	 OUT STD_LOGIC_VECTOR(12 DOWNTO 0);
 			SDRAM_DQML		:	 OUT STD_LOGIC;
@@ -62,6 +63,9 @@ constant demistify_serialdebug : std_logic := '0';
 			VGA_R		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 			VGA_G		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
 			VGA_B		:	 OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
+			PS2_CLK_IN : in std_logic;
+			PS2_DAT_IN : in std_logic;
+			C64_KEYS : in std_logic_vector(64 downto 0);
 			AUDIO_L  : out std_logic;
 			AUDIO_R  : out std_logic
 		);

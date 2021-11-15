@@ -1,8 +1,12 @@
 set sysclk ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[0]
+set clk1541 ${topmodule}pll|altpll_component|auto_generated|pll1|clk[0]
 
 create_generated_clock -name sdramclk -source ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[0] -invert $RAM_CLK
 
 # Clock groups
+set_clock_groups -asynchronous -group [get_clocks $hostclk] -group [get_clocks $sysclk]
+set_clock_groups -asynchronous -group [get_clocks $supportclk] -group [get_clocks $sysclk]
+set_clock_groups -asynchronous -group [get_clocks $supportclk] -group [get_clocks $clk1541]
 set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks ${topmodule}pll|altpll_component|auto_generated|pll1|clk[*]]
 set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[*]]
 set_clock_groups -asynchronous -group [get_clocks ${topmodule}pll|altpll_component|auto_generated|pll1|clk[0]] -group [get_clocks ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[0]]

@@ -189,7 +189,7 @@ architecture rtl of chameleon64v2_top is
 	signal audio_r : std_logic_vector(15 downto 0);
 
 -- IO	
-	signal c64_keys : unsigned(63 downto 0);
+	signal c64_keys : unsigned(64 downto 0);
 	signal c64_restore_key_n : std_logic;
 	signal c64_nmi_n : std_logic;
 	signal c64_joy1 : unsigned(6 downto 0);
@@ -363,7 +363,7 @@ begin
 				joystick2 => c64_joy2,
 				joystick3 => c64_joy3,
 				joystick4 => c64_joy4,
-				keys => c64_keys,
+				keys => c64_keys(63 downto 0),
 --				restore_key_n => restore_n
 				restore_key_n => open,
 				amiga_power_led => led_green,
@@ -397,15 +397,18 @@ port map (
 	c64_joy2 => c64_joy2,
 	c64_joy3 => c64_joy3,
 	c64_joy4 => c64_joy4,
-	c64_keys => c64_keys,
+	c64_keys => c64_keys(63 downto 0),
 	c64_joykey_ena => '1',
+
+	c64_restore_in => c64_restore_key_n and c64_nmi_n,
+	c64_restore_out => c64_keys(64),
 
 	joy1_out => joy1,
 	joy2_out => joy2,
 	joy3_out => joy3,
 	joy4_out => joy4,
 	menu_out_n => menu_button_n,
-
+	
 	usart_cts => usart_rts,
 	usart_rxd => usart_tx,
 	usart_txd => usart_rx,
@@ -426,10 +429,12 @@ port map (
 	guest: COMPONENT vic20_mist
 	PORT map
 	(
+		-- clocks
 --		CLOCK_27 => clk50m&clk50m, -- Comment out one of these lines to match the guest core.
 		CLOCK_27 => clk50m,
 --		RESET_N => reset_n,
-		-- clocks
+		LED => led_red,
+
 		SDRAM_DQ => ram_d,
 		SDRAM_A => ram_a,
 		SDRAM_DQML => ram_ldqm,
@@ -457,7 +462,10 @@ port map (
 		VGA_G => vga_green(7 downto 2),
 		VGA_B => vga_blue(7 downto 2),
 		AUDIO_L => sigma_l,
-		AUDIO_R => sigma_r
+		AUDIO_R => sigma_r,
+		C64_KEYS => std_logic_vector(c64_keys),
+		PS2_CLK_IN => ps2_keyboard_clk_in,
+		PS2_DAT_IN => ps2_keyboard_dat_in
 	);
 
 	-- Pass internal signals to external SPI interface
@@ -512,7 +520,6 @@ port map (
 		intercept => intercept
 	);
 
-led_red<=act_led and not spi_ss4;
 led_green<=(not act_led) and not spi_ss4;
 	
 end architecture;

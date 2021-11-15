@@ -55,6 +55,13 @@ module vic20_mist
    output        SDRAM_CLK,
    output        SDRAM_CKE,
 
+`ifdef DEMISTIFY_PS2_KEYBOARD
+   input         PS2_CLK_IN,
+	input         PS2_DAT_IN,
+`endif
+`ifdef DEMISTIFY_C64_KEYBOARD
+   input  [64:0] C64_KEYS,
+`endif
    input         UART_RX,
    output        UART_TX
 );
@@ -320,8 +327,18 @@ keyboard keyboard
 (
     .reset(reset),
     .clk_sys(clk_sys),
+`ifdef DEMISTIFY_PS2_KEYBOARD
+    .ps2_kbd_clk(PS2_CLK_IN),
+    .ps2_kbd_data(PS2_DAT_IN),
+`else
     .ps2_kbd_clk(ps2Clk),
     .ps2_kbd_data(ps2Data),
+`endif
+`ifdef DEMISTIFY_C64_KEYBOARD
+    .c64_keys(C64_KEYS),
+`else
+    .c64_keys({65{1'b1}}),
+`endif
     .col_in(col_in),
     .row_out(row_out),
     .row_in(row_in),
@@ -358,7 +375,7 @@ vic20 #(.I_EXTERNAL_ROM(1'b1)) VIC20
     .I_COL_OUT(col_out),
     .O_COL_IN(col_in),
     .I_ROW_OUT(row_out),
-    .I_RESTORE_OUT(fn_keys[11]),
+    .I_RESTORE_OUT(fn_keys[11]|~C64_KEYS[64]),
 
     .I_CART_EN(|st_8k_rom),  // at $A000(8k)
     .I_CART_RO(st_8k_rom != 2'd2),
