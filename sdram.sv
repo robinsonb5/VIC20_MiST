@@ -45,7 +45,7 @@ module sdram
 	output      [7:0] dout,			// data output to chipset/cpu
 	input      [22:0] addr,       // 25 bit byte address
 	input             oe,         // cpu/chipset requests read
-	input             we         // cpu/chipset requests write
+	input             we          // cpu/chipset requests write
 );
 
 assign SDRAM_CKE = ~init;
@@ -109,9 +109,10 @@ reg [1:0] mode;
 reg [4:0] reset=5'h1f;
 
 always @(posedge clk or posedge init) begin // Use async reset since init comes from the PLL's locked signal!
-	if(init)
+	if(init) begin
 		reset <= 5'h1f;
-	else begin
+		mode <= MODE_RESET;
+	end else begin
 		if(q == STATE_LAST) begin
 			if(reset != 0) begin
 				reset <= reset - 5'd1;
@@ -137,6 +138,8 @@ localparam CMD_LOAD_MODE       = 4'b0000;
 wire [7:0] ram_dout = a[0] ? i[15:8] : i[7:0];
 assign dout = oe ? ram_dout : 8'hFF;
 
+reg dqmh,dqml;
+
 // SDRAM state machines
 always @(posedge clk) begin
 	casex({ram_req,wr,mode,q})
@@ -154,19 +157,20 @@ always @(posedge clk) begin
 
 	casex({ram_req,mode,q})
 		{1'b1,  MODE_NORMAL, STATE_START}: SDRAM_A <= a[21:9];
-		{1'b1,  MODE_NORMAL, STATE_CONT }: SDRAM_A <= {4'b0010, a[22], a[8:1]};
+		{1'b1,  MODE_NORMAL, STATE_CONT }: SDRAM_A <= {dqmh,dqml,2'b10, a[22], a[8:1]};
 
 		// init
 		{1'bX,     MODE_LDM, STATE_START}: SDRAM_A <= MODE;
 		{1'bX,     MODE_PRE, STATE_START}: SDRAM_A <= 13'b0010000000000;
 
-		                          default: SDRAM_A <= 13'b0000000000000;
+		                          default: SDRAM_A <= {dqmh,dqml,11'b00000000000};
 	endcase
 
 	if(q == STATE_START) begin
 		SDRAM_BA <= (mode == MODE_NORMAL) ? bank : 2'b00;
 		SDRAM_DQ <= wr ? {din, din} : 16'bZZZZZZZZZZZZZZZZ;
 		{SDRAM_DQMH,SDRAM_DQML} <= {~a[0] & wr,a[0] & wr};
+		{dqmh,dqml} <= {~a[0] & wr,a[0] & wr};
 		if(wr) SDRAM_DQ <= { din, din };
 	end
 

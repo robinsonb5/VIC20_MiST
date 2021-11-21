@@ -217,14 +217,13 @@ architecture rtl of chameleon64v2_top is
 	signal spi_ss4 : std_logic;
 	signal conf_data0 : std_logic;
 	signal spi_clk_int : std_logic;
-
-	signal act_led : std_logic;
 	
 	signal iec_srq_in : std_logic;
 	signal iec_atn_in : std_logic;
 	signal iec_dat_in : std_logic;
 	signal iec_clk_in : std_logic;
 	-- Internal copies of the IEC signals since they need inverting.
+	signal iec_srq_s : std_logic;
 	signal iec_clk_s : std_logic;
 	signal iec_atn_s : std_logic;
 	signal iec_dat_s : std_logic;
@@ -361,8 +360,7 @@ begin
 		joystick3 => c64_joy3,
 		joystick4 => c64_joy4,
 		keys => c64_keys(63 downto 0),
---			restore_key_n => restore_n
-		restore_key_n => open,
+		restore_key_n => c64_restore_key_n,
 		amiga_power_led => led_green,
 		amiga_drive_led => led_red,
 		amiga_reset_n => amiga_reset_n,
@@ -394,7 +392,7 @@ begin
 		c64_joy3 => c64_joy3,
 		c64_joy4 => c64_joy4,
 		c64_keys => c64_keys(63 downto 0),
-		c64_joykey_ena => '1',
+		c64_joykey_ena => '0',
 
 		c64_restore_in => nmi_in and c64_restore_key_n, 
 		c64_restore_out => c64_keys(64),
@@ -475,11 +473,13 @@ begin
 	iec_atn_out <= not iec_atn_s;
 	iec_dat_out <= not iec_dat_s;
 	iec_clk_out <= not iec_clk_s;
+	iec_srq_out <= not iec_srq_s;
 
 	-- Safe defaults if we haven't connected the IEC port...
---	iec_atn_s<='0';
---	iec_dat_s<='0';
---	iec_clk_s<='0';
+--	iec_atn_s<='1';
+--	iec_dat_s<='1';
+--	iec_clk_s<='1';
+	iec_srq_s<='1';
 
 	-- Pass internal signals to external SPI interface
 	spi_clk <= spi_clk_int;
@@ -533,7 +533,7 @@ begin
 		intercept => intercept
 	);
 
-led_green<=(not act_led) and not spi_ss4;
+led_green<=not spi_ss4;
 	
 end architecture;
 

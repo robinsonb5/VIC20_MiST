@@ -44,11 +44,8 @@ entity c1541_logic is
     c1541rom_clk    : in std_logic;
     c1541rom_addr   : in std_logic_vector(13 downto 0);
     c1541rom_data   : in std_logic_vector(7 downto 0);
-    c1541rom_wr     : in std_logic;
-		
-		dbg_adr_fetch : out std_logic_vector(15 downto 0);  -- dbg DAR
-		dbg_cpu_irq   : out std_logic                       -- dbg DAR
-  );
+    c1541rom_wr     : in std_logic
+);
 end c1541_logic;
 
 architecture SYN of c1541_logic is

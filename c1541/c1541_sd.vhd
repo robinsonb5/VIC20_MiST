@@ -63,8 +63,8 @@ port(
 
 	dbg_track_num_dbl : out std_logic_vector(6 downto 0);
 	dbg_sd_busy     : out std_logic;
-	dbg_sd_state    : out std_logic_vector(7 downto 0);
-   dbg_read_sector : out std_logic_vector(4 downto 0);
+--	dbg_sd_state    : out std_logic_vector(7 downto 0); // Used by spi controller
+--	dbg_read_sector : out std_logic_vector(4 downto 0);
 	dbg_mtr         : out std_logic;
 	dbg_act         : out std_logic
 );
@@ -116,7 +116,7 @@ signal change_timer : integer;
 signal mounted : std_logic := '0';
 
 signal dbg_sector : std_logic_vector(4 downto 0); 
-signal dbg_adr_fetch : std_logic_vector(15 downto 0); 
+-- signal dbg_adr_fetch : std_logic_vector(15 downto 0); 
 
 component mist_sd_card port
 	(
@@ -185,10 +185,7 @@ begin
     c1541rom_clk    => c1541rom_clk,
     c1541rom_addr   => c1541rom_addr,
     c1541rom_data   => c1541rom_data,
-    c1541rom_wr     => c1541rom_wr,
-
-	 dbg_adr_fetch => dbg_adr_fetch,
-	 dbg_cpu_irq   => open
+    c1541rom_wr     => c1541rom_wr
   );
 
 floppy : entity work.gcr_floppy
@@ -391,14 +388,14 @@ ram_addr <= spi_ram_addr when sd_busy = '1' else floppy_ram_addr + ("000"&sector
 ram_we   <= spi_ram_we   when sd_busy = '1' else floppy_ram_we;
 ram_di   <= spi_ram_di   when sd_busy = '1' else floppy_ram_di;
 
-process (clk32)
-begin
-	if rising_edge(clk32) then
-		if dbg_adr_fetch = X"F4D7" then
-			dbg_read_sector <= dbg_sector;
-		end if;
-	end if;
-end process;
+--process (clk32)
+--begin
+--	if rising_edge(clk32) then
+--		if dbg_adr_fetch = X"F4D7" then
+--			dbg_read_sector <= dbg_sector;
+--		end if;
+--	end if;
+--end process;
 
 dbg_sd_busy  <= sd_busy;	
 dbg_track_num_dbl <= new_track_num_dbl;

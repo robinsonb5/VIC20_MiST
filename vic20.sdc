@@ -7,9 +7,9 @@ create_generated_clock -name sdramclk -source ${topmodule}pll_vic20|altpll_compo
 set_clock_groups -asynchronous -group [get_clocks $hostclk] -group [get_clocks $sysclk]
 set_clock_groups -asynchronous -group [get_clocks $supportclk] -group [get_clocks $sysclk]
 set_clock_groups -asynchronous -group [get_clocks $supportclk] -group [get_clocks $clk1541]
-set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks ${topmodule}pll|altpll_component|auto_generated|pll1|clk[*]]
-set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[*]]
-set_clock_groups -asynchronous -group [get_clocks ${topmodule}pll|altpll_component|auto_generated|pll1|clk[0]] -group [get_clocks ${topmodule}pll_vic20|altpll_component|auto_generated|pll1|clk[0]]
+set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks $clk1541]
+set_clock_groups -asynchronous -group [get_clocks spiclk] -group [get_clocks $sysclk]
+set_clock_groups -asynchronous -group [get_clocks $sysclk] -group [get_clocks $clk1541]
 
 # Some relaxed constrain to the VGA pins. The signals should arrive together, the delay is not really important.
 set_output_delay -clock [get_clocks $sysclk] -max 0 [get_ports $VGA_OUT]

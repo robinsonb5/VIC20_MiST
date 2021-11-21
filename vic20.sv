@@ -111,6 +111,7 @@ wire clk_32;
 wire clk_1541 = clk_32;
 reg clk8m;
 wire pll_locked;
+wire pll27_locked;
 reg clk_ref; //sync sdram to during prg downloading
 reg  reset;
 reg  c1541_reset;
@@ -192,6 +193,7 @@ pll_vic20 pll_vic20
     .locked(pll_locked)
 );
 
+
 always @(posedge clk_32) begin
     reg ntsc_d, ntsc_d2, ntsc_d3;
     reg [1:0] pll_reconfig_state = 0;
@@ -235,7 +237,8 @@ end
 pll27 pll
 (
     .inclk0(CLOCK_27),
-    .c0(clk_32) //32 MHz
+    .c0(clk_32), //32 MHz
+	 .locked(pll27_locked)
 );
 
 always @(posedge clk_sys) begin
@@ -244,7 +247,7 @@ always @(posedge clk_sys) begin
     clk_ref <= !sys_count;
     sys_count <= sys_count + 1'd1;
 
-    reset <= st_reset | st_cart_unload | buttons[1] | rom_download | force_reset | fn_keys[10];
+    reset <= st_reset | st_cart_unload | buttons[1] | rom_download | force_reset | fn_keys[10] | ~pll_locked;
     cart_unload <= 0;
     if (st_cart_unload | buttons[1] | (fn_keys[10] & mod_keys[0])) cart_unload <= 1;
     c1541_reset <= reset;
@@ -486,6 +489,7 @@ data_io data_io (
     .ioctl_dout     ( ioctl_dout )
 );
 
+
 always_comb begin
     casex ({tap_download, rom_download, ioctl_addr[15:13]})
         'bX1_00X: ioctl_target_addr = {7'h0, 2'b00, ioctl_addr[13:0]}; //1541
@@ -709,21 +713,25 @@ wire c1541_iec_atn_o;
 wire c1541_iec_data_o;
 wire c1541_iec_clk_o;
 
-reg disk_present;
+reg disk_present_1541;
 always @(posedge clk_1541)
-	disk_present=|img_size;
+	disk_present_1541=|img_size;
+
+reg disk_present_vic;
+always @(posedge clk_sys)
+	disk_present_vic=|img_size;
 
 reg c1541_reset_32_d;
 reg c1541_reset_32;
 
 `ifdef DEMISTIFY
-assign IEC_ATN_O = disk_present ? 1'b1 : vic20_iec_atn_o;
-assign IEC_CLK_O = disk_present ? 1'b1 : vic20_iec_clk_o;
-assign IEC_DATA_O = disk_present ? 1'b1 : vic20_iec_data_o;
+assign IEC_ATN_O = disk_present_vic ? 1'b1 : vic20_iec_atn_o;
+assign IEC_CLK_O = disk_present_vic ? 1'b1 : vic20_iec_clk_o;
+assign IEC_DATA_O = disk_present_vic ? 1'b1 : vic20_iec_data_o;
 
-assign iec_clk_int = disk_present ? c1541_iec_clk_o : IEC_CLK_I;
-assign iec_data_int = disk_present ? c1541_iec_data_o : IEC_DATA_I;
-assign iec_atn_int = disk_present ? c1541_iec_atn_o : IEC_ATN_I;
+assign iec_clk_int = disk_present_vic ? c1541_iec_clk_o : IEC_CLK_I;
+assign iec_data_int = disk_present_vic ? c1541_iec_data_o : IEC_DATA_I;
+assign iec_atn_int = disk_present_vic ? c1541_iec_atn_o : IEC_ATN_I;
 `else
 assign iec_clk_int = c1541_iec_clk_o;
 assign iec_data_int = c1541_iec_data_o;
@@ -733,7 +741,7 @@ assign iec_atn_int = c1541_iec_atn_o;
 // Sync reset to the 32MHz domain since some of the logic inside
 // the emulated drive uses synchronous resets.
 always @(posedge clk_1541) begin
-	c1541_reset_32_d<=c1541_reset;
+	c1541_reset_32_d<=c1541_reset | ~pll27_locked;
 	c1541_reset_32<=c1541_reset_32_d;
 end
 	
@@ -742,7 +750,7 @@ c1541_sd c1541_sd (
     .reset ( c1541_reset_32 ),
 
     .disk_change ( img_mounted ),
-	 .disk_mount ( disk_present),
+	 .disk_mount ( disk_present_1541),
     .disk_num ( 10'd0 ), // always 0 on MiST, the image is selected by the OSD menu
 
     .iec_atn_i  ( vic20_iec_atn_o  ),
@@ -767,5 +775,6 @@ c1541_sd c1541_sd (
     .c1541rom_data  ( ioctl_dout      ),
     .c1541rom_wr    ( ioctl_wr & rom_download & !ioctl_addr[15:14] )
 );
+
 
 endmodule
