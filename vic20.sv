@@ -83,14 +83,17 @@ localparam CONF_STR =
     "VIC20;PRGCRTTAP;",
     "S0U,D64,Mount Disk;",
     "TC,Play/Stop TAP;",
-    "OD,Tape sound,Off,On;",
-    "O3,Video,PAL,NTSC;",
-    "O2,CRT with load address,Yes,No;",
-    "OAB,Scanlines,Off,25%,50%,75%;",
-    "O45,Enable 8K+ Expansion,Off,8K,16K,24K;",
-    "O6,Enable 3K Expansion,Off,On;",
-    "O78,Enable 8k ROM,Off,RO,RW;",
-    "O9,Audio Filter,On,Off;",
+	 "P1,Memory configuration;",
+    "P1O78,Cartridge ,Off,ROM,RAM;",
+    "P1O2,CRT with load address,Yes,No;",
+    "P1O6,3K RAM Cartridge,Off,On;",
+    "P1O45,8K+ RAM Cartridge,Off,8K,16K,24K;",
+	 "P2,Video / Audio;",
+    "P2O3,Video,PAL,NTSC;",
+    "P2OAB,Scanlines,Off,25%,50%,75%;",
+    "P2OE,Composite blend,Off,On;",
+    "P2OD,Tape sound,Off,On;",
+    "P2O9,Audio Filter,On,Off;",
     "T0,Reset;",
     "T1,Reset with cart unload;",
     "V,v1.0.",`BUILD_DATE
@@ -278,6 +281,7 @@ wire        st_audio_filter        = ~status[9];
 wire  [1:0] st_scanlines           = status[11:10];
 wire        st_tap_play_btn        = status[12];
 wire        st_tape_sound          = status[13];
+wire        st_blend               = status[14];
 
 wire [31:0] sd_lba;
 wire        sd_rd;
@@ -679,7 +683,7 @@ mist_video #(.COLOR_DEPTH(4), .OSD_COLOR(3'd5), .SD_HCNT_WIDTH(10)) mist_video (
     // Rotate OSD [0] - rotate [1] - left or right
     .rotate      ( 2'b00      ),
     // composite-like blending
-    .blend       ( 1'b0       ),
+    .blend       ( st_blend      ),
 
     // video in
     .R           ( R_O        ),
