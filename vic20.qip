@@ -11,6 +11,8 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) vic20/vic2
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) vic20/vic20.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) vic20/rc_filter_1o.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) vic20/m6561.vhd]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) vic20/megacart.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) vic20/megacart_nvram.v]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) c1541/via6522.vhd]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) c1541/spram.vhd]
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) c1541/mist_sd_card.sv]

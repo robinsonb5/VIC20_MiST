@@ -409,6 +409,6 @@ dbg_track_num_dbl <= new_track_num_dbl;
 dbg_mtr <= mtr;
 dbg_act <= act;
 
-led <= act;
+led <= act or sd_busy; -- The core needs to know when it's safe to mux the sd interface.
 
 end struct;

@@ -48,11 +48,17 @@ compile:
 clean:
 	make -f $(DEMISTIFYPATH)/Makefile DEMISTIFYPATH=$(DEMISTIFYPATH) PROJECTTOROOT=$(PROJECTTOROOT) PROJECTPATH=$(PROJECTPATH) PROJECTS=$(PROJECT) BOARD=$(BOARD) clean
 
+.PHONY: implicit
+implicit:
+	@for BOARD in ${BOARDS}; do \
+		grep -r implicit $$BOARD/output_files/*.rpt || echo -n ; \
+	done
+
 .PHONY: tns
 tns:
 	@for BOARD in ${BOARDS}; do \
 		echo $$BOARD; \
-		grep -r Design-wide\ TNS $$BOARD/*.rpt; \
+		grep -r Design-wide\ TNS $$BOARD/output_files/*.rpt; \
 	done
 
 .PHONY: mist
