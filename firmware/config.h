@@ -24,7 +24,8 @@ here, the number of units defaults to 4. */
 #undef CONFIG_FILEBOOKMARKS 6
 
 /* Keyboard-based Joystick emulation */
-#undef CONFIG_JOYKEYS
+#define CONFIG_JOYKEYS
+#define CONFIG_JOYKEYS_TOGGLE
 
 /* Send key events via the mist_io block. If the core can support
    a PS/2 keyboard directly then that's probably a better option. */

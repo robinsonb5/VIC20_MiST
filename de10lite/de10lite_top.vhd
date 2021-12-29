@@ -191,6 +191,7 @@ guest: COMPONENT vic20_mist
 --		CLOCK_27 => MAX10_CLK2_50&MAX10_CLK2_50, -- Comment out one of these lines to match the guest core.
 		CLOCK_27 => MAX10_CLK2_50,
 --		RESET_N => reset_n,
+		LED => act_led,
 		-- clocks
 		SDRAM_DQ => DRAM_DQ,
 		SDRAM_A => DRAM_ADDR,
@@ -231,7 +232,7 @@ sd_clk <= spi_clk_int;
 controller : entity work.substitute_mcu
 	generic map (
 		sysclk_frequency => 500,
-		debug => true,
+		debug => false,
 		jtag_uart => false
 	)
 	port map (
@@ -269,7 +270,7 @@ controller : entity work.substitute_mcu
 		intercept => intercept
 );
 
-LEDR <= (others=>'0');
+LEDR <= (0=>not act_led,others=>'0');
 CLK_I2C_SCL <= '1';
 CLK_I2C_SDA	<='Z';
 GSENSOR_SCLK <= '0';
