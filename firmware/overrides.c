@@ -26,9 +26,8 @@ static void load()
 
 char *autoboot()
 {
-	int rom,mc,mcnv;
 	char *result=0;
-
+	rom=0; mc=0; mcnv=0;
 	load();
 
 	// Now attempt to change directory to "CHAM20"

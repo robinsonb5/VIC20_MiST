@@ -853,34 +853,42 @@ wire vic20_iec_atn_o;
 wire vic20_iec_data_o;
 wire vic20_iec_clk_o;
 
+wire c1541_iec_atn_i;
+wire c1541_iec_data_i;
+wire c1541_iec_clk_i;
+
 wire c1541_iec_atn_o;
 wire c1541_iec_data_o;
 wire c1541_iec_clk_o;
 
-reg disk_present_1541;
-always @(posedge clk_1541)
-	disk_present_1541=|img_size;
-
-reg disk_present_vic;
-always @(posedge clk_sys)
-	disk_present_vic=|img_size;
+reg disk_present;
+always @(posedge clk_1541) begin
+	if(c1541_reset_32)
+		disk_present<=1'b0;
+	if(img_mounted[0])
+		disk_present<=|img_size;
+end
 
 reg c1541_reset_32_d;
 reg c1541_reset_32;
 
 `ifdef DEMISTIFY
-assign IEC_ATN_O = disk_present_vic ? 1'b1 : vic20_iec_atn_o;
-assign IEC_CLK_O = disk_present_vic ? 1'b1 : vic20_iec_clk_o;
-assign IEC_DATA_O = disk_present_vic ? 1'b1 : vic20_iec_data_o;
+assign IEC_ATN_O = disk_present ? 1'b1 : vic20_iec_atn_o;
+assign IEC_CLK_O = disk_present ? 1'b1 : vic20_iec_clk_o;
+assign IEC_DATA_O = disk_present ? 1'b1 : vic20_iec_data_o;
 
-assign iec_clk_int = disk_present_vic ? c1541_iec_clk_o : IEC_CLK_I;
-assign iec_data_int = disk_present_vic ? c1541_iec_data_o : IEC_DATA_I;
-assign iec_atn_int = disk_present_vic ? c1541_iec_atn_o : IEC_ATN_I;
+assign iec_clk_int = disk_present ? c1541_iec_clk_o : IEC_CLK_I;
+assign iec_data_int = disk_present ? c1541_iec_data_o : IEC_DATA_I;
+assign iec_atn_int = disk_present ? c1541_iec_atn_o : IEC_ATN_I;
 `else
 assign iec_clk_int = c1541_iec_clk_o;
 assign iec_data_int = c1541_iec_data_o;
 assign iec_atn_int = c1541_iec_atn_o;
 `endif
+
+assign c1541_iec_atn_i = disk_present ? vic20_iec_atn_o : 1'b1;
+assign c1541_iec_clk_i = disk_present ? vic20_iec_clk_o : 1'b1;
+assign c1541_iec_data_i = disk_present ? vic20_iec_data_o : 1'b1;
 
 // Sync reset to the 32MHz domain since some of the logic inside
 // the emulated drive uses synchronous resets.
@@ -893,16 +901,16 @@ c1541_sd c1541_sd (
     .clk32 ( clk_1541 ),
     .reset ( c1541_reset_32 ),
 
-    .disk_change ( img_mounted ),
-    .disk_mount ( disk_present_1541),
+    .disk_change ( img_mounted[0] ),
+    .disk_mount ( |img_size ),
     .disk_num ( 10'd0 ), // always 0 on MiST, the image is selected by the OSD menu
 
-    .iec_atn_i  ( vic20_iec_atn_o  ),
-    .iec_data_i ( vic20_iec_data_o ),
-    .iec_clk_i  ( vic20_iec_clk_o  ),
+    .iec_atn_i  ( c1541_iec_atn_i  ),
+    .iec_data_i ( c1541_iec_data_i ),
+    .iec_clk_i  ( c1541_iec_clk_i  ),
     .iec_atn_o  ( c1541_iec_atn_o  ),
     .iec_data_o ( c1541_iec_data_o ),
-    .iec_clk_o  ( c1541_iec_clk_o ),
+    .iec_clk_o  ( c1541_iec_clk_o  ),
 
     .sd_lba         ( sd_lba_1541    ),
     .sd_rd          ( sd_rd_1541     ),

@@ -152,6 +152,7 @@ architecture rtl of chameleon64v2_top is
 	signal ps2_mouse_dat_out: std_logic;
 	
 	signal intercept : std_logic;
+	signal guest_led : std_logic;
 	
 	signal sdram_req : std_logic := '0';
 	signal sdram_ack : std_logic;
@@ -428,7 +429,7 @@ begin
 --		CLOCK_27 => clk50m&clk50m, -- Comment out one of these lines to match the guest core.
 		CLOCK_27 => clk50m,
 --		RESET_N => reset_n,
-		LED => led_red,
+		LED => guest_led,
 
 		SDRAM_DQ => ram_d,
 		SDRAM_A => ram_a,
@@ -533,7 +534,8 @@ begin
 		intercept => intercept
 	);
 
-led_green<=not spi_ss4;
+led_red <= not guest_led;
+led_green <= not spi_ss4;
 	
 end architecture;
 
