@@ -6,6 +6,7 @@ PROJECTTOROOT=../
 BOARD=
 ROMSIZE1=8192
 ROMSIZE2=4096
+STACKSIZE=320
 
 all: $(DEMISTIFYPATH)/site.template $(DEMISTIFYPATH)/site.mk $(SUBMODULES) firmware init compile tns mist
 # Use the file least likely to change within DeMiSTify to detect submodules!
@@ -30,11 +31,11 @@ $(SUBMODULES): $(DEMISTIFYPATH)/EightThirtyTwo/Makefile
 
 .PHONY: firmware
 firmware: $(SUBMODULES)
-	make -C firmware -f ../$(DEMISTIFYPATH)/firmware/Makefile DEMISTIFYPATH=../$(DEMISTIFYPATH) ROMSIZE1=$(ROMSIZE1) ROMSIZE2=$(ROMSIZE2)
+	make -C firmware -f ../$(DEMISTIFYPATH)/firmware/Makefile DEMISTIFYPATH=../$(DEMISTIFYPATH) STACKSIZE=$(STACKSIZE) ROMSIZE1=$(ROMSIZE1) ROMSIZE2=$(ROMSIZE2)
 
 .PHONY: firmware_clean
 firmware_clean: $(SUBMODULES)
-	make -C firmware -f ../$(DEMISTIFYPATH)/firmware/Makefile DEMISTIFYPATH=../$(DEMISTIFYPATH) ROMSIZE1=$(ROMSIZE1) ROMSIZE2=$(ROMSIZE2) clean
+	make -C firmware -f ../$(DEMISTIFYPATH)/firmware/Makefile DEMISTIFYPATH=../$(DEMISTIFYPATH) clean
 
 .PHONY: init
 init:

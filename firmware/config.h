@@ -40,5 +40,9 @@ here, the number of units defaults to 4. */
 #define ROM_REQUIRED
 #define ROM_FILENAME "VIC20   ROM"
 
+/* Do we support configuration files? */
+#define CONFIG_SETTINGS
+#define CONFIG_SETTINGS_FILENAME "VIC20   CFG"
+
 #endif
 
