@@ -537,7 +537,7 @@ megacart_nvram nvr
 	.a_a(sdram_vic20_a),
 	.d_a(from_vic),
 	.q_a(mc_nvram_out),
-	.we_a(mc_nvram_sel & ~vic_wr_n),
+	.we_a(mc_nvram_sel & ~mc_sdram_wr_n),
 	// UserIO interface
 	.clk_b(clk_1541),
 	.readnv(img_mounted[1]),
