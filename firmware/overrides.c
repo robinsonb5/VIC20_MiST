@@ -17,11 +17,11 @@ static void load()
 	romtype=0;
 	if(!rom)
 		rom=LoadROM("VIC20   ROM");
+	if(!mcnv)
+		mcnv=loadimage("MEGACARTNV ",'1');
 	romtype=2;
 	if(!mc)
 		mc=LoadROM("MEGACARTROM");
-	if(!mcnv)
-		mcnv=loadimage("MEGACARTNV ",'1');
 }
 
 char *autoboot()
